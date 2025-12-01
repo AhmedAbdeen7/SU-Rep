@@ -292,7 +292,7 @@ export default function CaseDetail() {
                     <span className="text-muted-foreground">Created:</span>
                     <span className="font-medium">{format(new Date(caseData.createdAt), "MMM d, yyyy")}</span>
                   </div>
-                  {!caseData.isAnonymous && caseData.studentName && (
+                  {caseData.studentName && (
                     <>
                       <div className="flex items-center gap-2 text-sm">
                         <User className="h-4 w-4 text-muted-foreground" />

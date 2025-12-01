@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -29,14 +28,13 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, uploadFile } from "@/lib/queryClient";
 import { insertCaseSchema, CASE_CATEGORIES } from "@/types/schema";
 import { z } from "zod";
-import { Loader2, Send, Shield } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { Upload, X, File } from "lucide-react";
 
 const studentCaseSchema = insertCaseSchema.extend({
   studentName: z.string().optional(),
   studentEmail: z.string().email().optional().or(z.literal("")),
   studentPhone: z.string().optional(),
-  isAnonymous: z.string().optional(),
 });
 
 type StudentCaseFormData = z.infer<typeof studentCaseSchema>;
@@ -55,11 +53,8 @@ export default function StudentSubmit() {
       studentName: "",
       studentEmail: "",
       studentPhone: "",
-      isAnonymous: "false",
     },
   });
-
-  const isAnonymous = form.watch("isAnonymous") === "true";
 
   const submitMutation = useMutation({
     mutationFn: async (data: StudentCaseFormData) => {
@@ -85,7 +80,7 @@ export default function StudentSubmit() {
     mutationFn: async ({ caseId, files }: { caseId: string; files: File[] }) => {
       const uploadPromises = files.map((file) =>
         uploadFile(`/api/v1/cases/${caseId}/attachments`, file, {
-          uploaded_by_name: form.getValues("studentName") || "Anonymous",
+          uploaded_by_name: form.getValues("studentName") || "Student",
         })
       );
       return await Promise.all(uploadPromises);
@@ -183,84 +178,57 @@ export default function StudentSubmit() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="isAnonymous"
+                  name="studentName"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem>
+                      <FormLabel>Your Name</FormLabel>
                       <FormControl>
-                        <Checkbox
-                          checked={field.value === "true"}
-                          onCheckedChange={(checked) => field.onChange(checked ? "true" : "false")}
-                          data-testid="checkbox-anonymous"
-                        />
+                        <Input placeholder="Enter your full name" {...field} data-testid="input-name" />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Submit Anonymously</FormLabel>
-                        <FormDescription className="flex items-center gap-2">
-                          <Shield className="h-3 w-3" />
-                          Your identity will be protected
-                        </FormDescription>
-                      </div>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {!isAnonymous && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="studentName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Your Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your full name" {...field} data-testid="input-name" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="studentEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="your.email@example.com"
+                            {...field}
+                            data-testid="input-email"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="studentEmail"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email (Optional)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="email"
-                                placeholder="your.email@example.com"
-                                {...field}
-                                data-testid="input-email"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="studentPhone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone (Optional)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="tel"
-                                placeholder="Your phone number"
-                                {...field}
-                                data-testid="input-phone"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </>
-                )}
+                  <FormField
+                    control={form.control}
+                    name="studentPhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="tel"
+                            placeholder="Your phone number"
+                            {...field}
+                            data-testid="input-phone"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}

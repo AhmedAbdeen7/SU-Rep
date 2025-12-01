@@ -34,7 +34,6 @@ export interface Case {
     status: CaseStatus;
     description: string;
     assignee: string | null;
-    isAnonymous: string;
     createdAt: Date | string;
     updatedAt: Date | string;
 }
@@ -57,7 +56,6 @@ export const insertCaseSchema = z.object({
     status: z.enum(CASE_STATUSES).optional(),
     description: z.string().min(10, "Description must be at least 10 characters"),
     assignee: z.string().optional(),
-    isAnonymous: z.string().optional(),
 });
 
 export type InsertCase = z.infer<typeof insertCaseSchema>;
