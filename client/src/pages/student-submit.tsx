@@ -33,8 +33,8 @@ import { Upload, X, File } from "lucide-react";
 
 const studentCaseSchema = insertCaseSchema.extend({
   studentName: z.string().optional(),
-  studentEmail: z.string().email().optional().or(z.literal("")),
-  studentPhone: z.string().optional(),
+  studentEmail: z.string().email("Please enter a valid email address").min(1, "Email is required"),
+  studentPhone: z.string().min(1, "Phone number is required"),
 });
 
 type StudentCaseFormData = z.infer<typeof studentCaseSchema>;
@@ -196,7 +196,7 @@ export default function StudentSubmit() {
                     name="studentEmail"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email (Optional)</FormLabel>
+                        <FormLabel>Email *</FormLabel>
                         <FormControl>
                           <Input
                             type="email"
@@ -215,7 +215,7 @@ export default function StudentSubmit() {
                     name="studentPhone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone (Optional)</FormLabel>
+                        <FormLabel>Phone *</FormLabel>
                         <FormControl>
                           <Input
                             type="tel"

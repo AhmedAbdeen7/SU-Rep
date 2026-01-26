@@ -11,11 +11,12 @@ import Dashboard from "@/pages/dashboard";
 import CaseDetail from "@/pages/case-detail";
 import StudentSubmit from "@/pages/student-submit";
 import AdminSubmit from "@/pages/admin-submit";
+import MyCases from "@/pages/my-cases";
 import NotFound from "@/pages/not-found";
 import { LayoutDashboard, FilePlus, Users } from "lucide-react";
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import Login from '@/pages/login';
+import Login from '@/pages/login';  
 import { useAuth } from '@/contexts/AuthContext';
 
 
@@ -54,6 +55,18 @@ function Navigation() {
                     >
                       <LayoutDashboard className="h-4 w-4 mr-2" />
                       Dashboard
+                    </Button>
+                  </Link>
+                )}
+                {user && !isAdmin && (
+                  <Link href="/my-cases">
+                    <Button
+                      variant={isActive("/my-cases") ? "secondary" : "ghost"}
+                      size="sm"
+                      data-testid="nav-my-cases"
+                    >
+                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      My Cases
                     </Button>
                   </Link>
                 )}
@@ -110,6 +123,12 @@ function Router() {
       <Route path="/submit">
         <ProtectedRoute>
           <StudentSubmit />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/my-cases">
+        <ProtectedRoute>
+          <MyCases />
         </ProtectedRoute>
       </Route>
 

@@ -38,22 +38,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Handle redirect result
         getRedirectResult(auth)
             .then((result) => {
-                console.log('Redirect result:', result);
                 if (result) {
                     const loginType = localStorage.getItem('pendingLoginType') || 'student';
-                    console.log('Login type:', loginType);
                     localStorage.removeItem('pendingLoginType');
 
                     result.user.getIdToken()
                         .then((idToken) => {
-                            console.log('Got idToken:', idToken.substring(0, 20) + '...');
                             const endpoint = loginType === 'admin' ? '/api/v1/admin/auth/login' : '/api/v1/auth/login';
-                            console.log('Calling endpoint:', endpoint);
 
                             return apiRequest('POST', endpoint, { idToken });
                         })
                         .then((response) => {
-                            console.log('Backend response:', response);
                             const token = response.data;
                             localStorage.setItem('authToken', token);
                             const decoded = jwtDecode(token);
@@ -63,7 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                                 (p: any) => p.permission_name === 'REP_CASE_MANAGEMENT_ADMIN'
                             );
                             setIsAdmin(!!hasRepPermission);
-                            console.log('Login successful!');
                         })
                         .catch((error) => {
                             console.error('Login flow error:', error);

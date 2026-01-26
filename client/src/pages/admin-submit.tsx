@@ -33,8 +33,8 @@ import { Link } from "wouter";
 
 const adminCaseSchema = insertCaseSchema.extend({
   studentName: z.string().min(1, "Student name is required"),
-  studentEmail: z.string().email().optional().or(z.literal("")),
-  studentPhone: z.string().optional(),
+  studentEmail: z.string().email("Please enter a valid email address").min(1, "Email is required"),
+  studentPhone: z.string().min(1, "Phone number is required"),
 });
 
 type AdminCaseFormData = z.infer<typeof adminCaseSchema>;
@@ -203,7 +203,7 @@ export default function AdminSubmit() {
                     name="studentEmail"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Student Email (Optional)</FormLabel>
+                        <FormLabel>Student Email *</FormLabel>
                         <FormControl>
                           <Input
                             type="email"
@@ -222,7 +222,7 @@ export default function AdminSubmit() {
                     name="studentPhone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Student Phone (Optional)</FormLabel>
+                        <FormLabel>Student Phone *</FormLabel>
                         <FormControl>
                           <Input
                             type="tel"

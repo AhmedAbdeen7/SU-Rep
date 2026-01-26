@@ -50,8 +50,8 @@ export interface CaseUpdate {
 
 export const insertCaseSchema = z.object({
     studentName: z.string().optional(),
-    studentEmail: z.string().email().optional(),
-    studentPhone: z.string().optional(),
+    studentEmail: z.string().email("Please enter a valid email address").min(1, "Email is required"),
+    studentPhone: z.string().min(1, "Phone number is required"),
     category: z.enum(CASE_CATEGORIES),
     status: z.enum(CASE_STATUSES).optional(),
     description: z.string().min(10, "Description must be at least 10 characters"),

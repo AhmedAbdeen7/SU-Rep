@@ -12,4 +12,5 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
     hd: 'aucegypt.edu',
+    prompt: 'select_account',  // Force account selection on each login
 });
