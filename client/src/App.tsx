@@ -18,6 +18,8 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import Login from '@/pages/login';  
 import { useAuth } from '@/contexts/AuthContext';
+import suLogo from '@/assets/SU-LOGOwhite-small.png';
+import { Footer } from '@/components/footer';
 
 
 function Navigation() {
@@ -31,17 +33,17 @@ function Navigation() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-primary/20 bg-primary text-primary-foreground">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link
               href="/"
-              className="flex items-center gap-2 font-semibold text-lg hover-elevate px-3 py-2 rounded-md transition-colors"
+              className="flex items-center gap-3 font-semibold text-lg hover:opacity-80 px-3 py-2 rounded-md transition-opacity"
               data-testid="link-home"
             >
-              <Users className="h-5 w-5 text-primary" />
-              <span className="hidden sm:inline">Student Union REP</span>
+              <img src={suLogo} alt="Student Union" className="h-14 w-auto" />
+              <span className="hidden sm:inline">REP Committee</span>
               <span className="sm:hidden">REP</span>
             </Link>
             {user && (
@@ -49,8 +51,9 @@ function Navigation() {
                 {isAdmin && (
                   <Link href="/dashboard">
                     <Button
-                      variant={isActive("/dashboard") ? "secondary" : "ghost"}
+                      variant="ghost"
                       size="sm"
+                      className={`text-primary-foreground hover:bg-white/20 ${isActive("/dashboard") ? "bg-white/20" : ""}`}
                       data-testid="nav-dashboard"
                     >
                       <LayoutDashboard className="h-4 w-4 mr-2" />
@@ -61,8 +64,9 @@ function Navigation() {
                 {user && !isAdmin && (
                   <Link href="/my-cases">
                     <Button
-                      variant={isActive("/my-cases") ? "secondary" : "ghost"}
+                      variant="ghost"
                       size="sm"
+                      className={`text-primary-foreground hover:bg-white/20 ${isActive("/my-cases") ? "bg-white/20" : ""}`}
                       data-testid="nav-my-cases"
                     >
                       <LayoutDashboard className="h-4 w-4 mr-2" />
@@ -72,8 +76,9 @@ function Navigation() {
                 )}
                 <Link href="/submit">
                   <Button
-                    variant={isActive("/submit") ? "secondary" : "ghost"}
+                    variant="ghost"
                     size="sm"
+                    className={`text-primary-foreground hover:bg-white/20 ${isActive("/submit") ? "bg-white/20" : ""}`}
                     data-testid="nav-submit"
                   >
                     <FilePlus className="h-4 w-4 mr-2" />
@@ -83,8 +88,9 @@ function Navigation() {
                 {isAdmin && (
                   <Link href="/admin/submit">
                     <Button
-                      variant={isActive("/admin/submit") ? "secondary" : "ghost"}
+                      variant="ghost"
                       size="sm"
+                      className={`text-primary-foreground hover:bg-white/20 ${isActive("/admin/submit") ? "bg-white/20" : ""}`}
                       data-testid="nav-admin-submit"
                     >
                       <FilePlus className="h-4 w-4 mr-2" />
@@ -97,7 +103,7 @@ function Navigation() {
           </div>
           <div className="flex items-center gap-2">
             {user && (
-              <Button variant="ghost" size="sm" onClick={logout}>
+              <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-white/20" onClick={logout}>
                 Logout
               </Button>
             )}
@@ -161,9 +167,12 @@ function App() {
       <ThemeProvider defaultTheme="light" storageKey="rep-theme">
         <TooltipProvider>
           <AuthProvider>
-            <div className="min-h-screen bg-background">
+            <div className="min-h-screen bg-background flex flex-col">
               <Navigation />
-              <Router />
+              <main className="flex-1">
+                <Router />
+              </main>
+              <Footer />
             </div>
             <Toaster />
           </AuthProvider>
