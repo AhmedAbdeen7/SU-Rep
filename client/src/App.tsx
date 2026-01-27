@@ -169,7 +169,7 @@ function App() {
           <AuthProvider>
             <div className="min-h-screen bg-background flex flex-col">
               <Navigation />
-              <main className="flex-1 flex flex-col">
+              <main className="flex-1">
                 <Router />
               </main>
               <Footer />
