@@ -25,7 +25,7 @@ export default function Login() {
             await login();
             toast({
                 title: 'Login successful',
-                description: 'Welcome to the Case Management System',
+                description: 'SU REP AUC',
             });
         } catch (error) {
             toast({
@@ -43,7 +43,6 @@ export default function Login() {
             <Card className="max-w-md w-full shadow-lg border-2">
                 <CardHeader className="text-center space-y-4">
                     <CardTitle className="text-2xl font-bold text-primary">REP Committee</CardTitle>
-                    <CardDescription className="text-base">Case Management System</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <Button
