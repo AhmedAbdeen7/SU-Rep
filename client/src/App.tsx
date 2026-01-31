@@ -43,7 +43,7 @@ function Navigation() {
               data-testid="link-home"
             >
               <img src={suLogo} alt="Student Union" className="h-14 w-auto" />
-              <span className="hidden sm:inline">REP Committee</span>
+              <span className="hidden sm:inline">SU REP</span>
               <span className="sm:hidden">REP</span>
             </Link>
             {user && (
