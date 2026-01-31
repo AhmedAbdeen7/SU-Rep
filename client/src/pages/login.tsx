@@ -42,7 +42,7 @@ export default function Login() {
         <div className="w-full bg-background flex items-center justify-center px-4 min-h-[calc(100vh-9rem)]">
             <Card className="max-w-md w-full shadow-lg border-2">
                 <CardHeader className="text-center space-y-4">
-                    <CardTitle className="text-2xl font-bold text-primary">REP Committee</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-primary">SU REP</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <Button
