@@ -48,6 +48,16 @@ export interface CaseUpdate {
     newStatus: CaseStatus | null;
 }
 
+export interface CaseMessage {
+    id: string;
+    caseId: string;
+    senderName: string | null;
+    senderEmail: string | null;
+    senderRole: "admin" | "student";
+    message: string;
+    createdAt: Date | string;
+}
+
 export const insertCaseSchema = z.object({
     studentName: z.string().optional(),
     studentEmail: z.string().email("Please enter a valid email address").min(1, "Email is required"),

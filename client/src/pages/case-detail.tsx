@@ -16,9 +16,11 @@ import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/status-badge";
 import { CategoryBadge } from "@/components/category-badge";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { apiRequest, queryClient, uploadFile } from "@/lib/queryClient";
 import type { Case, CaseUpdate, CaseStatus } from "@/types/schema";
 import { CASE_STATUSES } from "@/types/schema";
+import { CaseMessages } from "@/components/case-messages";
 import { format } from "date-fns";
 import { ArrowLeft, Calendar, User, Mail, Phone, Loader2, Save } from "lucide-react";
 import { Upload, FileText, Download } from "lucide-react";
@@ -26,6 +28,7 @@ import { Upload, FileText, Download } from "lucide-react";
 export default function CaseDetail() {
   const { caseId } = useParams();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
   const [newStatus, setNewStatus] = useState<CaseStatus | "">("");
   const [assignee, setAssignee] = useState("");
   const [note, setNote] = useState("");
@@ -68,7 +71,7 @@ export default function CaseDetail() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: { status?: CaseStatus; assignee_name?: string; assignee_google_id?: string | null; note?: string; actor: string }) => {
+    mutationFn: async (data: { status?: CaseStatus; assignee_name?: string; assignee_email?: string; assignee_google_id?: string | null; note?: string; actor: string }) => {
       return await apiRequest("PATCH", `/api/v1/cases/${caseId}`, data);
     },
     onSuccess: () => {
@@ -83,16 +86,28 @@ export default function CaseDetail() {
       setAssignee("");
       setNote("");
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error updating case",
-        description: "There was an error updating the case. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "There was an error updating the case. Please try again.",
         variant: "destructive",
       });
     },
   });
 
   const handleUpdate = () => {
+    if (!isAdmin) {
+      toast({
+        title: "Unauthorized",
+        description: "Only admins can update case status, assignment, or notes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!newStatus && !assignee && !note) {
       toast({
         title: "No changes",
@@ -104,8 +119,9 @@ export default function CaseDetail() {
 
     updateMutation.mutate({
       status: newStatus || undefined,
-      assignee_name: assignee || undefined,
-      assignee_google_id: assignee ? null : undefined,
+      assignee_email: assignee || undefined,
+      // Keep existing assignee_google_id unless explicitly changed by a dedicated selector flow
+      assignee_google_id: undefined,
       note: note || undefined,
       actor: "Admin User",
     });
@@ -210,6 +226,8 @@ export default function CaseDetail() {
                   )}
                 </CardContent>
               </Card>
+
+              {caseId && <CaseMessages caseId={caseId} />}
             </div>
             <Card>
               <CardHeader>
@@ -325,70 +343,72 @@ export default function CaseDetail() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Update Case</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Change Status</Label>
-                    <Select value={newStatus} onValueChange={(value) => setNewStatus(value as CaseStatus)}>
-                      <SelectTrigger id="status" data-testid="select-status">
-                        <SelectValue placeholder="Select new status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CASE_STATUSES.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {status}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              {isAdmin && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Update Case</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="status">Change Status</Label>
+                      <Select value={newStatus} onValueChange={(value) => setNewStatus(value as CaseStatus)}>
+                        <SelectTrigger id="status" data-testid="select-status">
+                          <SelectValue placeholder="Select new status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CASE_STATUSES.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {status}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="assignee">Assign To</Label>
-                    <Input
-                      id="assignee"
-                      placeholder="Admin name or email"
-                      value={assignee}
-                      onChange={(e) => setAssignee(e.target.value)}
-                      data-testid="input-assignee"
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="assignee">Assign To</Label>
+                      <Input
+                        id="assignee"
+                        placeholder="Admin email (e.g. name@aucegypt.edu)"
+                        value={assignee}
+                        onChange={(e) => setAssignee(e.target.value)}
+                        data-testid="input-assignee"
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="note">Add Note</Label>
-                    <Textarea
-                      id="note"
-                      placeholder="Add a note or comment..."
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      rows={4}
-                      data-testid="textarea-note"
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="note">Add Note</Label>
+                      <Textarea
+                        id="note"
+                        placeholder="Add a note or comment..."
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        rows={4}
+                        data-testid="textarea-note"
+                      />
+                    </div>
 
-                  <Button
-                    onClick={handleUpdate}
-                    disabled={updateMutation.isPending}
-                    className="w-full"
-                    data-testid="button-update-case"
-                  >
-                    {updateMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Updating...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="h-4 w-4 mr-2" />
-                        Update Case
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
+                    <Button
+                      onClick={handleUpdate}
+                      disabled={updateMutation.isPending}
+                      className="w-full"
+                      data-testid="button-update-case"
+                    >
+                      {updateMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Update Case
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
