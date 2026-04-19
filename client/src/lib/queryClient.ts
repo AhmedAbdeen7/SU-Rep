@@ -32,6 +32,19 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+async function parseResponseBody(res: Response) {
+  if (res.status === 204) {
+    return null;
+  }
+
+  const contentLength = res.headers.get("content-length");
+  if (contentLength === "0") {
+    return null;
+  }
+
+  return res.json();
+}
+
 export async function apiRequest(
   method: string,
   url: string,
@@ -48,13 +61,15 @@ export async function apiRequest(
   });
 
   await throwIfResNotOk(res);
-  return res.json();
+  return parseResponseBody(res);
 }
 
 export async function uploadFile(
   url: string,
   file: File,
-  additionalData?: Record<string, string>
+  additionalData?: Record<string, string>,
+  onProgress?: (progress: number) => void,
+  abortSignal?: AbortSignal
 ): Promise<any> {
   const formData = new FormData();
   formData.append("file", file);
@@ -65,15 +80,74 @@ export async function uploadFile(
     });
   }
 
-  const res = await fetch(withBaseUrl(url), {
-    method: "POST",
-    headers: getAuthHeaders() as HeadersInit, // Add auth headers
-    body: formData,
-    credentials: "include",
-  });
+  const requestUrl = withBaseUrl(url);
 
-  await throwIfResNotOk(res);
-  return res.json();
+  return await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    let abortHandler: (() => void) | null = null;
+
+    xhr.open("POST", requestUrl, true);
+    xhr.withCredentials = true;
+
+    const authHeaders = getAuthHeaders() as Record<string, string>;
+    Object.entries(authHeaders).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value);
+    });
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        const progress = Math.round((event.loaded / event.total) * 100);
+        onProgress(progress);
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Network error while uploading file"));
+    };
+
+    xhr.onabort = () => {
+      const abortError = new Error("Upload canceled");
+      (abortError as Error & { name: string }).name = "AbortError";
+      reject(abortError);
+    };
+
+    xhr.onload = async () => {
+      try {
+        const responseText = xhr.responseText || "";
+        const response = responseText ? JSON.parse(responseText) : null;
+
+        if (xhr.status < 200 || xhr.status >= 300) {
+          const errorMessage =
+            response?.message || response?.error || xhr.statusText || "Upload failed";
+          reject(new Error(`${xhr.status}: ${errorMessage}`));
+          return;
+        }
+
+        if (onProgress) {
+          onProgress(100);
+        }
+
+        resolve(response);
+      } catch (error) {
+        reject(error);
+      } finally {
+        if (abortHandler && abortSignal) {
+          abortSignal.removeEventListener("abort", abortHandler);
+        }
+      }
+    };
+
+    if (abortSignal) {
+      abortHandler = () => xhr.abort();
+      if (abortSignal.aborted) {
+        xhr.abort();
+        return;
+      }
+      abortSignal.addEventListener("abort", abortHandler, { once: true });
+    }
+
+    xhr.send(formData);
+  });
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

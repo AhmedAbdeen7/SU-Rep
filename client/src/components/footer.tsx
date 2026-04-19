@@ -1,4 +1,5 @@
 import suLogo from '@/assets/SU-LOGOwhite-small.png';
+import { Link } from "wouter";
 
 export function Footer() {
   return (
@@ -8,6 +9,11 @@ export function Footer() {
           <div className="text-sm opacity-80 text-center sm:text-left">
             <div>© {new Date().getFullYear()} AUC Student Union. All rights reserved.</div>
             <div className="mt-1">Developed by Ahmed Abdeen & Islam Abdeen</div>
+            <div className="mt-2">
+              <Link href="/faq" className="underline hover:text-white">FAQ</Link>
+              <span className="mx-2 opacity-50">|</span>
+              <Link href="/awareness-videos" className="underline hover:text-white">Awareness Videos</Link>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm opacity-80 hidden sm:inline">AUC Student Union</span>

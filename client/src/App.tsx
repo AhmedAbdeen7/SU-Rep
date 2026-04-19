@@ -7,13 +7,15 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import Home from "@/pages/home";
+import FAQPage from "@/pages/faq";
+import AwarenessVideosPage from "@/pages/awareness-videos";
 import Dashboard from "@/pages/dashboard";
 import CaseDetail from "@/pages/case-detail";
 import StudentSubmit from "@/pages/student-submit";
 import AdminSubmit from "@/pages/admin-submit";
 import MyCases from "@/pages/my-cases";
 import NotFound from "@/pages/not-found";
-import { LayoutDashboard, FilePlus, Users } from "lucide-react";
+import { LayoutDashboard, FilePlus, Users, HelpCircle, PlayCircle } from "lucide-react";
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import Login from '@/pages/login';  
@@ -85,6 +87,28 @@ function Navigation() {
                     Submit Case
                   </Button>
                 </Link>
+                <Link href="/faq">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`text-primary-foreground hover:bg-white/20 ${isActive("/faq") ? "bg-white/20" : ""}`}
+                    data-testid="nav-faq"
+                  >
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    FAQ
+                  </Button>
+                </Link>
+                <Link href="/awareness-videos">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`text-primary-foreground hover:bg-white/20 ${isActive("/awareness-videos") ? "bg-white/20" : ""}`}
+                    data-testid="nav-awareness-videos"
+                  >
+                    <PlayCircle className="h-4 w-4 mr-2" />
+                    Videos
+                  </Button>
+                </Link>
                 {isAdmin && (
                   <Link href="/admin/submit">
                     <Button
@@ -119,6 +143,10 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+
+      <Route path="/faq" component={FAQPage} />
+
+      <Route path="/awareness-videos" component={AwarenessVideosPage} />
 
       <Route path="/">
         <ProtectedRoute>
